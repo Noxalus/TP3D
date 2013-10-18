@@ -12,6 +12,12 @@ bool				CreateWindows(HINSTANCE, int);
 bool				CreateDevice();
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 
+// Structure d'un vertex
+struct Vertex{
+	D3DXVECTOR3 Position;
+	D3DCOLOR Color;
+};
+
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	MSG oMsg;
@@ -47,20 +53,55 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	pp.EnableAutoDepthStencil = true; // True si on veut un depth-stencil buffer
 	pp.AutoDepthStencilFormat = D3DFMT_D24S8; // Le format du deth-stencil buffer
 	pp.Flags = 0; // Voir le man
-	pp. FullScreen_RefreshRateInHz = 0; //Voir le man
+	pp.FullScreen_RefreshRateInHz = 0; //Voir le man
 	pp.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT; // Autrement dit 0, voir le man
 
 	IDirect3DDevice9 *device;
 	pD3D->CreateDevice(0, D3DDEVTYPE_HAL, hWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, &pp, &device);
 
+	// Vertex declaration
+	D3DVERTEXELEMENT9 dwDecl3[] = {
+		{0, 0, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, 
+		D3DDECLUSAGE_POSITION, 0},
+		{0, 12, D3DDECLTYPE_D3DCOLOR, D3DDECLMETHOD_DEFAULT, 
+		D3DDECLUSAGE_COLOR, 0},
+		D3DDECL_END() 
+	};
+
+	IDirect3DVertexDeclaration9 *pDecl;
+	device->CreateVertexDeclaration(dwDecl3, &pDecl );
+
+	// Vertex buffer
+	int vertexCount = 3;
+	IDirect3DVertexBuffer9* pVertexBuffer;
+	device->CreateVertexBuffer(vertexCount * sizeof(Vertex), 0, 0, D3DPOOL_DEFAULT, &pVertexBuffer, NULL);
+
+	Vertex* pData;
+
+	pVertexBuffer->Lock(0, 0, (void**) &pData, 0);
+
+	pData[0].Position = D3DXVECTOR3(0.5f, 0.66f, 0);
+	pData[0].Color = D3DCOLOR_RGBA(255, 0, 0, 0);
+
+	pData[1].Position = D3DXVECTOR3(0.33f, 0.33f, 0);
+	pData[1].Color = D3DCOLOR_RGBA(255, 0, 0, 0);
+
+	pData[2].Position = D3DXVECTOR3(0.66f, 0.33f, 0);
+	pData[2].Color = D3DCOLOR_RGBA(255, 0, 0, 0);
+
+	pVertexBuffer-> Unlock();
+
+
+	device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+
 	LPCWSTR pFxFile = L"../Resources/shader.fx";
 	LPD3DXEFFECT pEffect;
 	LPD3DXBUFFER CompilationErrors;
-	
+
 	if (D3D_OK != D3DXCreateEffectFromFile(device, pFxFile, NULL, NULL, 0, NULL, &pEffect, &CompilationErrors))
 	{
 		MessageBoxA (NULL, (char *) 
-		CompilationErrors->GetBufferPointer(), "Error", 0);
+			CompilationErrors->GetBufferPointer(), "Error", 0);
 	}
 
 	PeekMessage( &oMsg, NULL, 0, 0, PM_NOREMOVE );
@@ -75,13 +116,36 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		{
 			// Do a lot of thing like draw triangles with DirectX
 			D3DCOLOR color = D3DCOLOR_RGBA(0, 0, 255, 0);
-			device->Clear(0, NULL, D3DCLEAR_TARGET, color, 1.0f, 0);
+			device->Clear(0, NULL, D3DCLEAR_TARGET|D3DCLEAR_ZBUFFER, color, 1.0f, 0);
 			device->BeginScene();
 			// c’est ici que je fais du coloriage
+
+			// Set device vertex declaration
+			device->SetVertexDeclaration(pDecl);
+			
+			device->SetStreamSource(0, pVertexBuffer, 0, sizeof(Vertex));
+
+			
+			
+			unsigned int cPasses, iPass;
+			pEffect->Begin(&cPasses, 0);
+			for (iPass= 0; iPass< cPasses; ++iPass)
+			{
+			pEffect->BeginPass(iPass);
+			pEffect->CommitChanges(); // que si on a changé des états après le BeginPass
+			device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 1);
+			pEffect->EndPass();
+			}
+			pEffect->End();
+			
+
 			device->EndScene();
 			device->Present(NULL, NULL, NULL, NULL); 
 		}
 	}
+
+	device->Release();
+
 	//Release D3D objectssss
 	return (int) oMsg.wParam;
 }

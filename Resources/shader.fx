@@ -1,6 +1,6 @@
 struct VertexInput
 {
-	float4 Position   : POSITION;
+	float3 Position   : POSITION;
 	float4 Color    : COLOR;
 };
 
@@ -19,7 +19,7 @@ VertexOutput VertexMain(VertexInput input)
 {
 	VertexOutput output;
 
-	output.Position = input.Position;
+	output.Position = float4(input.Position,1.0f);
 	output.Color = input.Color;
 	
 	return output;
@@ -27,6 +27,7 @@ VertexOutput VertexMain(VertexInput input)
 
 float4 PixelMain(VertexOutput input) : COLOR0	
 {
+	input.Color.xyzw = float4(1.f, 0.f, 0.f, 0.f);
 	return input.Color;
 }
 
