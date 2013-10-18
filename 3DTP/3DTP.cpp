@@ -64,6 +64,12 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		else
 		{
 			// Do a lot of thing like draw triangles with DirectX
+			D3DCOLOR color = D3DCOLOR_RGBA(255, 0, 0, 0);
+			device->Clear(0, NULL, D3DCLEAR_TARGET, color, 1.0f, 0);
+			device->BeginScene();
+			// c’est ici que je fais du coloriage
+			device->EndScene();
+			device->Present(NULL, NULL, NULL, NULL); 
 		}
 	}
 	//Release D3D objectssss
