@@ -5,7 +5,7 @@
 
 // Global Variables:
 HINSTANCE hInst;			// current instance
-HWND			hWnd;				// windows handle used in DirectX initialization
+HWND	  hWnd;				// windows handle used in DirectX initialization
 
 // Forward declarations
 bool				CreateWindows(HINSTANCE, int);
@@ -49,6 +49,9 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	pp.Flags = 0; // Voir le man
 	pp. FullScreen_RefreshRateInHz = 0; //Voir le man
 	pp.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT; // Autrement dit 0, voir le man
+
+	IDirect3DDevice9 *device;
+	pD3D->CreateDevice(0, D3DDEVTYPE_HAL, hWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, &pp, &device);
 
 	PeekMessage( &oMsg, NULL, 0, 0, PM_NOREMOVE );
 	while ( oMsg.message != WM_QUIT )
