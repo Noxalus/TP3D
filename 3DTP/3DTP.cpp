@@ -27,7 +27,28 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		return false;
 	}
 
-	//Create and fill other DirectX Stuffs like Vertex/Index buffer, shaders 
+	//Create and fill other DirectX Stuffs like Vertex/Index buffer, shaders
+
+	// Création de l’interface DirectX 9
+	LPDIRECT3D9 pD3D = Direct3DCreate9(D3D_SDK_VERSION);
+
+	D3DDISPLAYMODE displayMode;
+	D3DPRESENT_PARAMETERS pp;
+	pD3D->GetAdapterDisplayMode (D3DADAPTER_DEFAULT, &displayMode);
+	pp.Windowed = true; //Mode fenêtré ou pas
+	pp.SwapEffect = D3DSWAPEFFECT_DISCARD;
+	pp.BackBufferWidth  = 1280;// Taille en x du Back Buffer
+	pp.BackBufferHeight  = 720; // Taille en y du Back Buffer
+	pp.BackBufferFormat  =  displayMode.Format; // Format du Back Buffer
+	pp.BackBufferCount  = 1; // Nombre de Back Buffer
+	pp.MultiSampleType = D3DMULTISAMPLE_NONE ; // Nombre de sample pour l’antialiasing
+	pp.MultiSampleQuality  = 0; // Qualité pour l’antialiasing
+	pp.hDeviceWindow = hWnd; //Handle de la fenêtre
+	pp.EnableAutoDepthStencil = true; // True si on veut un depth-stencil buffer
+	pp.AutoDepthStencilFormat = D3DFMT_D24S8; // Le format du deth-stencil buffer
+	pp.Flags = 0; // Voir le man
+	pp. FullScreen_RefreshRateInHz = 0; //Voir le man
+	pp.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT; // Autrement dit 0, voir le man
 
 	PeekMessage( &oMsg, NULL, 0, 0, PM_NOREMOVE );
 	while ( oMsg.message != WM_QUIT )
@@ -49,7 +70,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 bool CreateWindows(HINSTANCE hInstance, int nCmdShow)
 {
-  hInst = hInstance; // Store instance handle in our global variable
+	hInst = hInstance; // Store instance handle in our global variable
 
 	//
 	WNDCLASSEX wcex;
@@ -63,18 +84,18 @@ bool CreateWindows(HINSTANCE hInstance, int nCmdShow)
 	wcex.lpszClassName	= L"3DTPClassName";
 
 	if ( RegisterClassEx(&wcex) == 0 )
-			return false;
+		return false;
 
-   hWnd = CreateWindow(L"3DTPClassName", L"This course is awesome", WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
+	hWnd = CreateWindow(L"3DTPClassName", L"This course is awesome", WS_OVERLAPPEDWINDOW,
+		CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
 
-   if (!hWnd)
-      return false;
+	if (!hWnd)
+		return false;
 
-   ShowWindow(hWnd, nCmdShow);
-   UpdateWindow(hWnd);
+	ShowWindow(hWnd, nCmdShow);
+	UpdateWindow(hWnd);
 
-   return true;
+	return true;
 }
 
 bool CreateDevice()
@@ -97,12 +118,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_KEYUP:
 		{
 			switch(wParam)
-      {
-          case VK_ESCAPE:
-						{
-							PostQuitMessage(0);
-							break;
-						}
+			{
+			case VK_ESCAPE:
+				{
+					PostQuitMessage(0);
+					break;
+				}
 			}
 			break;
 		}

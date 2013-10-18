@@ -14,3 +14,9 @@
 
 # right problem
 3DTP.opensdf
+Debug/*
+3DTP/Debug/*
+ipch/*
+*.ilk
+*.pdb
+*.exe
