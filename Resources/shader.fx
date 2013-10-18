@@ -27,7 +27,7 @@ VertexOutput VertexMain(VertexInput input)
 
 float4 PixelMain(VertexOutput input) : COLOR0	
 {
-	input.Color.xyzw = float4(1.f, 0.f, 0.f, 0.f);
+	//input.Color.xyzw = float4(1.f, 0.f, 0.f, 0.f);
 	return input.Color;
 }
 

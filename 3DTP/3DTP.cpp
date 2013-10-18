@@ -80,20 +80,35 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 	pVertexBuffer->Lock(0, 0, (void**) &pData, 0);
 
-	pData[0].Position = D3DXVECTOR3(0.5f, 0.66f, 0);
+	pData[0].Position = D3DXVECTOR3(0.f, 1.f, 0);
 	pData[0].Color = D3DCOLOR_RGBA(255, 0, 0, 0);
 
-	pData[1].Position = D3DXVECTOR3(0.33f, 0.33f, 0);
-	pData[1].Color = D3DCOLOR_RGBA(255, 0, 0, 0);
+	pData[1].Position = D3DXVECTOR3(-1.f, -1.f, 0);
+	pData[1].Color = D3DCOLOR_RGBA(0, 255, 0, 0);
 
-	pData[2].Position = D3DXVECTOR3(0.66f, 0.33f, 0);
-	pData[2].Color = D3DCOLOR_RGBA(255, 0, 0, 0);
+	pData[2].Position = D3DXVECTOR3(1.f, -1.f, 0);
+	pData[2].Color = D3DCOLOR_RGBA(0, 0, 255, 0);
 
 	pVertexBuffer-> Unlock();
 
-
 	device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 
+	// Index buffer
+	IDirect3DIndexBuffer9* pIndexBuffer;
+	device->CreateIndexBuffer(sizeof(int) * vertexCount, 0, D3DFMT_INDEX32, D3DPOOL_DEFAULT, &pIndexBuffer, NULL);
+
+	int* pIndexData;
+	pIndexBuffer->Lock(0, 0, (void**) &pIndexData, 0);
+
+	pIndexData[0] = 0;
+	pIndexData[1] = 1;
+	pIndexData[2] = 2;
+
+	pIndexBuffer-> Unlock();
+
+	device->SetIndices(pIndexBuffer);
+
+	// Shader
 	LPCWSTR pFxFile = L"../Resources/shader.fx";
 	LPD3DXEFFECT pEffect;
 	LPD3DXBUFFER CompilationErrors;
@@ -122,31 +137,35 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 			// Set device vertex declaration
 			device->SetVertexDeclaration(pDecl);
-			
+
 			device->SetStreamSource(0, pVertexBuffer, 0, sizeof(Vertex));
 
-			
-			
 			unsigned int cPasses, iPass;
 			pEffect->Begin(&cPasses, 0);
 			for (iPass= 0; iPass< cPasses; ++iPass)
 			{
-			pEffect->BeginPass(iPass);
-			pEffect->CommitChanges(); // que si on a changé des états après le BeginPass
-			device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 1);
-			pEffect->EndPass();
+				pEffect->BeginPass(iPass);
+				pEffect->CommitChanges(); // que si on a changé des états après le BeginPass
+				
+				
+				device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 1);
+				//device->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, vertexCount, 0, 1);
+
+				pEffect->EndPass();
 			}
+
 			pEffect->End();
-			
 
 			device->EndScene();
 			device->Present(NULL, NULL, NULL, NULL); 
 		}
 	}
 
-	device->Release();
-
 	//Release D3D objectssss
+	device->Release();
+	pVertexBuffer->Release();
+
+
 	return (int) oMsg.wParam;
 }
 
