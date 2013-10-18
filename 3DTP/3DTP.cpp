@@ -53,6 +53,16 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	IDirect3DDevice9 *device;
 	pD3D->CreateDevice(0, D3DDEVTYPE_HAL, hWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, &pp, &device);
 
+	LPCWSTR pFxFile = L"../Resources/shader.fx";
+	LPD3DXEFFECT pEffect;
+	LPD3DXBUFFER CompilationErrors;
+	
+	if (D3D_OK != D3DXCreateEffectFromFile(device, pFxFile, NULL, NULL, 0, NULL, &pEffect, &CompilationErrors))
+	{
+		MessageBoxA (NULL, (char *) 
+		CompilationErrors->GetBufferPointer(), "Error", 0);
+	}
+
 	PeekMessage( &oMsg, NULL, 0, 0, PM_NOREMOVE );
 	while ( oMsg.message != WM_QUIT )
 	{
@@ -64,7 +74,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		else
 		{
 			// Do a lot of thing like draw triangles with DirectX
-			D3DCOLOR color = D3DCOLOR_RGBA(255, 0, 0, 0);
+			D3DCOLOR color = D3DCOLOR_RGBA(0, 0, 255, 0);
 			device->Clear(0, NULL, D3DCLEAR_TARGET, color, 1.0f, 0);
 			device->BeginScene();
 			// c’est ici que je fais du coloriage
