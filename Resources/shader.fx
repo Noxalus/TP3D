@@ -1,3 +1,5 @@
+shared float4x4 WorldViewProj;
+
 struct VertexInput
 {
 	float3 Position   : POSITION;
@@ -19,7 +21,7 @@ VertexOutput VertexMain(VertexInput input)
 {
 	VertexOutput output;
 
-	output.Position = float4(input.Position,1.0f);
+	output.Position = mul(float4(input.Position, 1.0f), WorldViewProj);
 	output.Color = input.Color;
 	
 	return output;
