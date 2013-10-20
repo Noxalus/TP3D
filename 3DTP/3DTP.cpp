@@ -150,7 +150,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
   pCircleVertexBuffer->Lock(0, 0, (void**) &pCircleVertexData, 0);
 
   // Center
-  pCircleVertexData[0].Position = D3DXVECTOR3(0, 0, 0);
+  pCircleVertexData[0].Position = D3DXVECTOR3(0, 0, 0.5f);
   pCircleVertexData[0].Color = D3DCOLOR_RGBA(255, 0, 0, 0);
 
   double step = (2 * D3DX_PI) / (circleVertexCount - 1);
@@ -160,7 +160,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
   int green = 0;
   for(int i = 1; i < circleVertexCount; i++)
   {
-    pCircleVertexData[i].Position = D3DXVECTOR3(cos(pos), sin(pos), 1.f);
+    pCircleVertexData[i].Position = D3DXVECTOR3(cos(pos), sin(pos), 0.5f);
     pCircleVertexData[i].Color = D3DCOLOR_RGBA(red, green, blue, 0);
 
     pos -= step;
@@ -194,16 +194,16 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
   pRectangleVertexBuffer->Lock(0, 0, (void**) &pRectangleVertexData, 0);
 
-  pRectangleVertexData[0].Position = D3DXVECTOR3(-1, 1, 1);
+  pRectangleVertexData[0].Position = D3DXVECTOR3(-2, 2, 1.5f);
   pRectangleVertexData[0].Color = D3DCOLOR_RGBA(255, 0, 0, 0);
 
-  pRectangleVertexData[1].Position = D3DXVECTOR3(1, 1, 1);
+  pRectangleVertexData[1].Position = D3DXVECTOR3(2, 2, 1.5f);
   pRectangleVertexData[1].Color = D3DCOLOR_RGBA(0, 255, 0, 0);
 
-  pRectangleVertexData[2].Position = D3DXVECTOR3(-1, -1, 1);
+  pRectangleVertexData[2].Position = D3DXVECTOR3(-2, -2, 1.5f);
   pRectangleVertexData[2].Color = D3DCOLOR_RGBA(0, 0, 255, 0);
 
-  pRectangleVertexData[3].Position = D3DXVECTOR3(1, -1, 1);
+  pRectangleVertexData[3].Position = D3DXVECTOR3(2, -2, 1.5f);
   pRectangleVertexData[3].Color = D3DCOLOR_RGBA(255, 0, 0, 0);
 
   pRectangleVertexBuffer-> Unlock();
@@ -317,13 +317,16 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
   }
 
   //Release D3D objectssss
+  pD3D->Release();
   device->Release();
+  pDecl->Release();
   pVertexBuffer->Release();
   pIndexBuffer->Release();
   pCircleVertexBuffer->Release();
   pCircleIndexBuffer->Release();
+  pRectangleVertexBuffer->Release();
+  pRectangleIndexBuffer->Release();
   pEffect->Release();
-
 
   return (int) oMsg.wParam;
 }
