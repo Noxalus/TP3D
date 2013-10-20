@@ -2,6 +2,7 @@
 #include "d3d9.h"
 #include "d3dx9.h"
 #include "3DTP.h"
+#include <math.h>
 
 // Global Variables:
 HINSTANCE hInst;			// current instance
@@ -43,11 +44,10 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
   D3DXMATRIX World;
 
   D3DXMATRIX Position;
-  D3DXMATRIX Translation;
   D3DXMATRIX Rotation;
 
   D3DXMatrixIdentity(&World);
-  //World = Rotation * Position * Translation;
+  //World = Rotation * Position;
 
   // View matrix
   D3DXMATRIX View;
@@ -102,27 +102,29 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
   IDirect3DVertexDeclaration9 *pDecl;
   device->CreateVertexDeclaration(dwDecl3, &pDecl );
 
+  // Culling ?
+  //device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+
+  /** Vertex & Index buffers (Triangle) **/
   // Vertex buffer
   int vertexCount = 3;
   IDirect3DVertexBuffer9* pVertexBuffer;
   device->CreateVertexBuffer(vertexCount * sizeof(Vertex), 0, 0, D3DPOOL_DEFAULT, &pVertexBuffer, NULL);
 
-  Vertex* pData;
+  Vertex* pVertexData;
 
-  pVertexBuffer->Lock(0, 0, (void**) &pData, 0);
+  pVertexBuffer->Lock(0, 0, (void**) &pVertexData, 0);
 
-  pData[0].Position = D3DXVECTOR3(-0.5f, -0.5f, 0);
-  pData[0].Color = D3DCOLOR_RGBA(255, 0, 0, 0);
+  pVertexData[0].Position = D3DXVECTOR3(-0.5f, -0.5f, 0);
+  pVertexData[0].Color = D3DCOLOR_RGBA(255, 0, 0, 0);
 
-  pData[1].Position = D3DXVECTOR3(0.f, 0.5f, 0);
-  pData[1].Color = D3DCOLOR_RGBA(0, 255, 0, 0);
+  pVertexData[1].Position = D3DXVECTOR3(0.f, 0.5f, 0);
+  pVertexData[1].Color = D3DCOLOR_RGBA(0, 255, 0, 0);
 
-  pData[2].Position = D3DXVECTOR3(0.5f, -0.5f, 0);
-  pData[2].Color = D3DCOLOR_RGBA(0, 0, 255, 0);
+  pVertexData[2].Position = D3DXVECTOR3(0.5f, -0.5f, 0);
+  pVertexData[2].Color = D3DCOLOR_RGBA(0, 0, 255, 0);
 
   pVertexBuffer-> Unlock();
-
-  //device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 
   // Index buffer
   IDirect3DIndexBuffer9* pIndexBuffer;
@@ -137,7 +139,88 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
   pIndexBuffer->Unlock();
 
-  device->SetIndices(pIndexBuffer);
+  /** Vertex & Index buffers (Circle) **/
+  // Vertex buffer
+  int circleVertexCount = 42;
+  IDirect3DVertexBuffer9* pCircleVertexBuffer;
+  device->CreateVertexBuffer(circleVertexCount * sizeof(Vertex), 0, 0, D3DPOOL_DEFAULT, &pCircleVertexBuffer, NULL);
+
+  Vertex* pCircleVertexData;
+
+  pCircleVertexBuffer->Lock(0, 0, (void**) &pCircleVertexData, 0);
+
+  // Center
+  pCircleVertexData[0].Position = D3DXVECTOR3(0, 0, 0);
+  pCircleVertexData[0].Color = D3DCOLOR_RGBA(255, 0, 0, 0);
+
+  double step = (2 * D3DX_PI) / (circleVertexCount - 1);
+  double pos = 0;
+  int blue = 255;
+  int red = 0;
+  int green = 0;
+  for(int i = 1; i < circleVertexCount; i++)
+  {
+    pCircleVertexData[i].Position = D3DXVECTOR3(cos(pos), sin(pos), 1.f);
+    pCircleVertexData[i].Color = D3DCOLOR_RGBA(red, green, blue, 0);
+
+    pos -= step;
+  }
+
+  pCircleVertexBuffer-> Unlock();
+
+  // Index buffer
+  IDirect3DIndexBuffer9* pCircleIndexBuffer;
+  device->CreateIndexBuffer(sizeof(int) * (circleVertexCount + 1), 0, D3DFMT_INDEX32, D3DPOOL_DEFAULT, &pCircleIndexBuffer, NULL);
+
+  int* pCircleIndexData;
+  pCircleIndexBuffer->Lock(0, 0, (void**) &pCircleIndexData, 0);
+
+  for(int i = 0; i < circleVertexCount; i++)
+  {
+    pCircleIndexData[i] = i;
+  }
+
+  pCircleIndexData[circleVertexCount] = 1;
+
+  pCircleIndexBuffer->Unlock();
+
+  /** Vertex & Index buffers (Rectangle) **/
+  // Vertex buffer
+  int rectangleVertexCount = 4;
+  IDirect3DVertexBuffer9* pRectangleVertexBuffer;
+  device->CreateVertexBuffer(rectangleVertexCount * sizeof(Vertex), 0, 0, D3DPOOL_DEFAULT, &pRectangleVertexBuffer, NULL);
+
+  Vertex* pRectangleVertexData;
+
+  pRectangleVertexBuffer->Lock(0, 0, (void**) &pRectangleVertexData, 0);
+
+  pRectangleVertexData[0].Position = D3DXVECTOR3(-1, 1, 1);
+  pRectangleVertexData[0].Color = D3DCOLOR_RGBA(255, 0, 0, 0);
+
+  pRectangleVertexData[1].Position = D3DXVECTOR3(1, 1, 1);
+  pRectangleVertexData[1].Color = D3DCOLOR_RGBA(0, 255, 0, 0);
+
+  pRectangleVertexData[2].Position = D3DXVECTOR3(-1, -1, 1);
+  pRectangleVertexData[2].Color = D3DCOLOR_RGBA(0, 0, 255, 0);
+
+  pRectangleVertexData[3].Position = D3DXVECTOR3(1, -1, 1);
+  pRectangleVertexData[3].Color = D3DCOLOR_RGBA(255, 0, 0, 0);
+
+  pRectangleVertexBuffer-> Unlock();
+
+  // Index buffer
+  IDirect3DIndexBuffer9* pRectangleIndexBuffer;
+  device->CreateIndexBuffer(sizeof(int) * rectangleVertexCount, 0, D3DFMT_INDEX32, D3DPOOL_DEFAULT, &pRectangleIndexBuffer, NULL);
+
+  int* pRectangleIndexData;
+  pRectangleIndexBuffer->Lock(0, 0, (void**) &pRectangleIndexData, 0);
+
+  for(int i = 0; i < rectangleVertexCount; i++)
+  {
+    pRectangleIndexData[i] = i;
+  }
+
+  pRectangleIndexBuffer->Unlock();
 
   // Shader
   LPCWSTR pFxFile = L"../Resources/shader.fx";
@@ -165,24 +248,63 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
       // Do a lot of thing like draw triangles with DirectX
       device->Clear(0, NULL, D3DCLEAR_TARGET|D3DCLEAR_ZBUFFER, backgroundColor, 1.0f, 0);
       device->BeginScene();
-      // c’est ici que je fais du coloriage
 
       // Set device vertex declaration
       device->SetVertexDeclaration(pDecl);
 
-      device->SetStreamSource(0, pVertexBuffer, 0, sizeof(Vertex));
-
+      // "Send" WorldViewProj matrix to shader
       pEffect->SetMatrix(hWorldViewProj, &WorldViewProj);
 
       unsigned int cPasses, iPass;
+
+      // Draw triangle
+      device->SetStreamSource(0, pVertexBuffer, 0, sizeof(Vertex));
+      device->SetIndices(pIndexBuffer);
+
+      cPasses = 0, iPass = 0;
       pEffect->Begin(&cPasses, 0);
       for (iPass= 0; iPass< cPasses; ++iPass)
       {
         pEffect->BeginPass(iPass);
         pEffect->CommitChanges(); // que si on a changé des états après le BeginPass
 
-        //device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 1);
         device->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, 0, 0, vertexCount, 0, 1);
+
+        pEffect->EndPass();
+      }
+
+      pEffect->End();
+
+      // Draw circle
+      device->SetStreamSource(0, pCircleVertexBuffer, 0, sizeof(Vertex));
+      device->SetIndices(pCircleIndexBuffer);
+
+      cPasses = 0, iPass = 0;
+      pEffect->Begin(&cPasses, 0);
+      for (iPass= 0; iPass< cPasses; ++iPass)
+      {
+        pEffect->BeginPass(iPass);
+        pEffect->CommitChanges(); // que si on a changé des états après le BeginPass
+
+        device->DrawIndexedPrimitive(D3DPT_TRIANGLEFAN, 0, 0, circleVertexCount, 0, circleVertexCount - 1);
+
+        pEffect->EndPass();
+      }
+
+      pEffect->End();
+
+      // Draw rectangle
+      device->SetStreamSource(0, pRectangleVertexBuffer, 0, sizeof(Vertex));
+      device->SetIndices(pRectangleIndexBuffer);
+
+      cPasses = 0, iPass = 0;
+      pEffect->Begin(&cPasses, 0);
+      for (iPass= 0; iPass< cPasses; ++iPass)
+      {
+        pEffect->BeginPass(iPass);
+        pEffect->CommitChanges(); // que si on a changé des états après le BeginPass
+
+        device->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, 0, 0, rectangleVertexCount, 0, 2);
 
         pEffect->EndPass();
       }
@@ -198,6 +320,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
   device->Release();
   pVertexBuffer->Release();
   pIndexBuffer->Release();
+  pCircleVertexBuffer->Release();
+  pCircleIndexBuffer->Release();
   pEffect->Release();
 
 
